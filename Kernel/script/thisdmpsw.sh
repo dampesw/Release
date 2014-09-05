@@ -1,0 +1,30 @@
+#!  /bin/bash
+:<<EOF
+ *  $Id: thisdmpsw.sh, 2014-04-27 10:51:43 DAMPE $
+ *  Author(s):
+ *    Chi WANG (chiwang@mail.ustc.edu.cn) 01/10/2013
+ *---------------------------------------------------------------------
+ *  source me(anywhere is Okay) to setup envirenment of DAMPE software
+ *---------------------------------------------------------------------
+EOF
+
+#+  Set installation environment of DAMPE offline software 
+if [ ! $DMPSWSYS ];then
+  if [[ $0 == *bash ]];then
+    export DMPSWSYS=$(cd `dirname $BASH_SOURCE`/..;pwd)
+  else
+    export DMPSWSYS=$(cd `dirname $0`/..;pwd)
+  fi
+  export DMPSWWORK=$HOME/dmpwork
+  export PATH=$DMPSWSYS/bin:$PATH
+  export PYTHONPATH=$DMPSWSYS/lib:$DMPSWWORK/lib:$PYTHONPATH
+  export DMPSWGEOMETRY=$DMPSWSYS/share
+  export DMPSWCONFIGPATH=$DMPSWSYS/share/Configuration
+  if [ $LD_LIBRARY_PATH ];then
+    export LD_LIBRARY_PATH=$DMPSWSYS/lib:$DMPSWWORK/lib:$LD_LIBRARY_PATH
+  fi
+  if [ $DYLD_LIBRARY_PATH ];then        # Mac OS
+    export DYLD_LIBRARY_PATH=$DMPSWSYS/lib:$DMPSWWORK/lib:$DYLD_LIBRARY_PATH
+  fi
+fi
+

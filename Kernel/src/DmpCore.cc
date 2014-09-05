@@ -1,0 +1,203 @@
+/*
+ *  $Id: DmpCore.cc, 2014-06-11 20:59:15 DAMPE $
+ *  Author(s):
+ *    Chi WANG (chiwang@mail.ustc.edu.cn) 22/04/2014
+*/
+
+#include <time.h>
+
+#include "DmpCore.h"
+#include "DmpIOSvc.h"
+
+//-------------------------------------------------------------------
+DmpCore::DmpCore()
+ :fAlgMgr(0),
+  fSvcMgr(0),
+  fLaunchTime("20130101-0000"),
+  fMaxEventNo(-1),
+  fStartTime(0),
+  fStopTime(0),
+  fInitializeDone(false),
+  fTerminateRun(false)
+{
+  std::cout<<"*******************************************************"<<std::endl;
+  // do not use DmpLogxxx at here
+  std::cout<<"      Offline software of DAMPE (DMPSW)"<<std::endl;
+  std::cout<<"      version:  1.0.1"<<std::endl;
+  std::cout<<"*******************************************************"<<std::endl;
+  fAlgMgr = DmpAlgorithmManager::GetInstance();
+  fSvcMgr = DmpServiceManager::GetInstance();
+  fSvcMgr->Append(DmpIOSvc::GetInstance());
+  OptMap.insert(std::make_pair("LogLevel",  0));    // value: None, Error, Warning, Info, Debug
+  OptMap.insert(std::make_pair("EventNumber",1));   // value: any number
+  OptMap.insert(std::make_pair("StartTime", 2));    // value: format 20131231-1430
+  OptMap.insert(std::make_pair("StopTime",  3));    // value: format 20131231-1430
+  OptMap.insert(std::make_pair("LogHeader", 4));    // value: on, off
+  //OptMap.insert(std::make_pair("Seed",  4));        // value: any number
+}
+
+//-------------------------------------------------------------------
+DmpCore::~DmpCore(){
+}
+
+//-------------------------------------------------------------------
+bool DmpCore::Initialize(){
+  //*
+  //* Important! First, initialize servises, then algorithms
+  //*
+  std::cout<<"\n  [DmpCore::Initialize] Initialize..."<<std::endl;
+  if(not fSvcMgr->Initialize()) return false;
+  if(not fAlgMgr->Initialize()) return false;
+  if(-1 == fMaxEventNo){
+    fMaxEventNo = 1234567890;
+  }
+  if(0 == fStopTime){
+    fStopTime = DeltaTime("21130101-0000");
+  }
+  fInitializeDone = true;
+  std::cout<<"  [DmpCore::Initialize] ... initialized successfully\n"<<std::endl;
+  return true;
+}
+
+//-------------------------------------------------------------------
+bool DmpCore::Run(){
+  if(not fInitializeDone) return false;
+// *
+// *  TODO: use cut of time range??
+// *
+  for(long i=0;i<fMaxEventNo;++i){
+
+    DmpLogDebug<<"event ID = "<<i<<DmpLogEndl;
+    if(!DmpIOSvc::GetInstance()->ReadEvent()) return false;
+    if(!fAlgMgr->ProcessOneEvent()) return false;
+    if(!DmpIOSvc::GetInstance()->FillEvent()) return false;
+    DmpLogDebug<<" ... finished event"<<DmpLogEndl<<DmpLogEndl<<DmpLogEndl;
+
+    if(fAlgMgr->GetEventLoopTerminateSignal()) break;
+    if(DmpIOSvc::GetInstance()->GetEventLoopTerminateSignal()) break;
+  }
+  return true;
+}
+
+//-------------------------------------------------------------------
+bool DmpCore::run(){
+  if(not fInitializeDone){
+    return false;
+  }
+  std::cout<<"\n  [DmpCore::Run] Running..."<<std::endl;
+// *
+// *  TODO: use cut of time range??
+// *
+  long evtID = 0;
+  while (false == fTerminateRun){
+    if(evtID%1000 == 0){
+      DmpLogInfo<<"\tevent ID = "<<evtID<<DmpLogEndl;
+    }
+    if(fAlgMgr->ProcessOneEvent()){
+      DmpIOSvc::GetInstance()->FillEvent();
+    }
+    ++evtID;
+    if(evtID == fMaxEventNo){
+      fTerminateRun = true;
+    }
+  }
+  std::cout<<"  [DmpCore::Run] Done\n"<<std::endl;
+  return true;
+}
+
+//-------------------------------------------------------------------
+bool DmpCore::Finalize(){
+  std::cout<<"\n  [DmpCore::Finalize] Finalize..."<<std::endl;
+  //*
+  //* Important! First, finalize algorithms, then services!
+  //*
+//-------------------------------------------------------------------
+  //* if fAlgMgr->Finalize() false, will not call fSvMgr->Finialize(), that what we do NOT wanted
+  //if(not fAlgMgr->Finalize())   return false;
+  fAlgMgr->Finalize();
+  //if(not fSvcMgr->Finalize())   return false;
+  fSvcMgr->Finalize();
+  std::cout<<"  [DmpCore::Finalize] ... finalized successfully\n"<<std::endl;
+  return true;
+}
+
+//-------------------------------------------------------------------
+#include <boost/lexical_cast.hpp>
+void DmpCore::Set(const std::string &type,const std::string &value){
+  if(OptMap.find(type) == OptMap.end()){
+    DmpLogError<<"No argument type: "<<type<<DmpLogEndl;
+    throw;
+  }
+  switch(OptMap[type]){
+    case 0:
+    {// LogLevel
+      DmpLog::SetLogLevel(value);
+      break;
+    }
+    case 1:
+    {// EventNumber
+      fMaxEventNo = boost::lexical_cast<long>(value);
+      break;
+    }
+    case 2:
+    {// StartTime
+      fStartTime = DeltaTime(value);
+      break;
+    }
+    case 3:
+    {// StopTime
+      fStopTime = DeltaTime(value);
+      break;
+    }
+    case 4:
+    {// LogHeader
+      if("on" == value || "On" == value || "ON" == value){
+        DmpLog::ShowLogHeader(true);
+      }else if("off" == value || "Off" == value || "OFF" == value){
+        DmpLog::ShowLogHeader(false);
+      }
+      break;
+    }
+  }
+}
+
+//-------------------------------------------------------------------
+void DmpCore::SetLogLevel(const std::string &l,const short &s)const{
+  DmpLog::SetLogLevel(l);
+  if(1 == s){
+    DmpLog::ShowLogHeader(true);
+  }
+}
+
+//-------------------------------------------------------------------
+long DmpCore::DeltaTime(const std::string &endT)const{
+  std::string tmp;
+  struct tm startT;    // 20130101-0000
+  tmp.assign(fLaunchTime.begin(),  fLaunchTime.begin()+4);    startT.tm_year = boost::lexical_cast<int>(tmp) - 1900;  // since 1900
+  tmp.assign(fLaunchTime.begin()+4,fLaunchTime.begin()+6);    startT.tm_mon  = boost::lexical_cast<int>(tmp) - 1;     // 0 ~ 11
+  tmp.assign(fLaunchTime.begin()+6,fLaunchTime.begin()+8);    startT.tm_mday = boost::lexical_cast<int>(tmp);         // 1 ~ 31
+  tmp.assign(fLaunchTime.end()-4,  fLaunchTime.end()-2);      startT.tm_hour = boost::lexical_cast<int>(tmp);         // 0 ~ 23
+  tmp.assign(fLaunchTime.end()-2,  fLaunchTime.end());        startT.tm_min  = boost::lexical_cast<int>(tmp);         // 0 ~ 59
+  startT.tm_sec = 0;       // 0 ~ 60
+  struct tm stopT;
+  tmp.assign(endT.begin(),  endT.begin()+4);    stopT.tm_year = boost::lexical_cast<int>(tmp) - 1900;  // since 1900
+  tmp.assign(endT.begin()+4,endT.begin()+6);    stopT.tm_mon  = boost::lexical_cast<int>(tmp) - 1;     // 0 ~ 11
+  tmp.assign(endT.begin()+6,endT.begin()+8);    stopT.tm_mday = boost::lexical_cast<int>(tmp);         // 1 ~ 31
+  tmp.assign(endT.end()-4,  endT.end()-2);      stopT.tm_hour = boost::lexical_cast<int>(tmp);         // 0 ~ 23
+  tmp.assign(endT.end()-2,  endT.end());        stopT.tm_min  = boost::lexical_cast<int>(tmp);         // 0 ~ 59
+  stopT.tm_sec = 0;       // 0 ~ 60
+  return difftime(mktime(&stopT),mktime(&startT));
+}
+
+//-------------------------------------------------------------------
+bool DmpCore::EventInTimeWindow(const long &t) const{
+  if(fStartTime < t && t < fStopTime){
+    return true;
+  }
+  return false;
+}
+
+// Global DAMPE core
+DmpCore *gCore = DmpCore::GetInstance();
+
+
