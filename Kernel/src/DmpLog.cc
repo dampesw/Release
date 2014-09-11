@@ -1,5 +1,5 @@
 /*
- *  $Id: DmpLog.cc, 2014-06-16 13:35:58 DAMPE $
+ *  $Id: DmpLog.cc, 2014-09-10 09:40:28 DAMPE $
  *  Author(s):
  *    Chi WANG (chiwang@mail.ustc.edu.cn) 19/05/2014
  *    Andrii Tykhonov (Andrii.Tykhonov@cern.ch) 22/05/2014
@@ -8,7 +8,7 @@
 #include "DmpLog.h"
 
 short DmpLog::logLevel = DmpLog::INFO;
-bool DmpLog::logShowFunctionHeader = false;
+bool DmpLog::logHeader = false;
 
 //-------------------------------------------------------------------
 void DmpLog::SetLogLevel(const std::string &myLogLevel){
@@ -29,7 +29,11 @@ void DmpLog::SetLogLevel(const std::string &myLogLevel){
 }
 
 //-------------------------------------------------------------------
-void DmpLog::ShowLogHeader(bool show){
-  DmpLog::logShowFunctionHeader = show;
+void DmpLog::SetLogHeader(const std::string &header){
+  if("on"==header || "On"==header || "ON"==header){
+    DmpLog::logHeader = true;
+  }else{
+    DmpLog::logHeader = false;
+  }
 }
 

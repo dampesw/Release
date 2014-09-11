@@ -1,18 +1,39 @@
 #! /bin/bash
 :<<EOF
- *  $Id: dmpsw-config, 2014-03-22 14:31:13 chi $
+ *  $Id: dmpsw-config, 2014-08-16 21:47:33 DAMPE $
  *  Author(s):
- *    Chi WANG (chiwang@mail.ustc.edu.cn) 30/07/2014
+ *    Chi WANG (chiwang@mail.ustc.edu.cn) 30/07/2013
  *---------------------------------------------------
  *  Description:
  *      must in $DMPSWSYS/bin
  *---------------------------------------------------
 EOF
 
+#-----------------------------------------------------------------------
+# function help
+#          print help on available command line arguments and enabled
+
+Help(){
+cat<<EOF
+
+Usage: dmpsw-config [OPTION...]
+
+  --prefix                Print installation prefix of DAMPE Software
+  --version               Print version for DAMPE Software
+  --libs                  Print basic libraries
+  --cflags                Print header path and compiler flags
+  --include               Print header path
+  --help                  Print help information
+
+EOF
+  exit 1
+}
+
+#-------------------------------------------------------------------
 prefix=$DMPSWSYS
 
 #   list all libraries of DMPSW
-libs="-lDmpKernel -lDmpEvent"
+libs="-lDmpKernel -lDmpEvent -lDmpBase"
 :<<EOF
 for file in `ls ${prefix}/lib`;do
   if [[ ${file} = *libDmp* && ${file} = *.so* ]];then
@@ -24,56 +45,39 @@ done
 EOF
 
 #-----------------------------------------------------------------------
-# function help
-#          print help on available command line arguments and enabled
-
-help(){
-cat<<EOF
-
-Usage: dmpsw-config [OPTION...]
-
-  --prefix                output installation prefix of DAMPE Software
-  --version               output version for DAMPE Software
-  --libs                  output all linker flags
-  --cflags                output all preprocessor and compiler flags
-  --help                  output help information
-
-EOF
-  exit 1
-}
-
-
-#-----------------------------------------------------------------------
 # output
 #       will be used while using DAMPE software.
 
 out=""
 
 while test $# -gt 0; do
-  case "$1" in
-    -*=*)
-      optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'`
-      ;;
-    *)
-      optarg=
-      ;;
-  esac
+  #case "$1" in
+  #  -*=*)
+  #    optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'`
+  #    ;;
+  #  *)
+  #    optarg=
+  #    ;;
+  #esac
 
   case $1 in
     --prefix)
       out="$out $prefix"
       ;;
    --libs)
-      out="$out -L$prefix/lib $libs"
+      out="$out -L$DMPSWWORK/lib -L$prefix/lib $libs"
       ;;
    --cflags)
-      out="$out -I$prefix/include"
+      out="$out -I$DMPSWWORK/include -I$prefix/include -fPIC -O3"   # add ?
+      ;;
+   --include)
+      out="$out -I$DMPSWWORK/include -I$prefix/include"
       ;;
    -?)
-      help
+      Help
       ;;
    --help)
-      help
+      Help
       ;;
    --version)
       out="DMPSW verison VERSION"  # How to set this automatically while installation ??

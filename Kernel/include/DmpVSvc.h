@@ -1,5 +1,5 @@
 /*
- *  $Id: DmpVSvc.h, 2014-07-09 22:04:36 DAMPE $
+ *  $Id: DmpVSvc.h, 2014-09-06 11:10:29 DAMPE $
  *  Author(s):
  *    Chi WANG (chiwang@mail.ustc.edu.cn) 10/04/2014
 */
@@ -20,7 +20,7 @@ class DmpVSvc{
  *
  */
 public:
-  DmpVSvc(const std::string &n):fName(n),fIniStatus(true){}
+  DmpVSvc(const std::string &n):fName(n){}
   virtual ~DmpVSvc(){}
   virtual bool Initialize()=0;
   virtual bool Finalize()=0;
@@ -33,7 +33,6 @@ public:
 
 protected:
   std::map<std::string,short>   OptMap; // a map of set options
-  bool          fIniStatus;     // status of initialization
 
 private:
   std::string   fName;

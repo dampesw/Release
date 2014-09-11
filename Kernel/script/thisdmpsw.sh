@@ -1,6 +1,6 @@
 #!  /bin/bash
 :<<EOF
- *  $Id: thisdmpsw.sh, 2014-04-27 10:51:43 DAMPE $
+ *  $Id: thisdmpsw.sh, 2014-09-05 15:20:07 DAMPE $
  *  Author(s):
  *    Chi WANG (chiwang@mail.ustc.edu.cn) 01/10/2013
  *---------------------------------------------------------------------
@@ -17,7 +17,7 @@ if [ ! $DMPSWSYS ];then
   fi
   export DMPSWWORK=$HOME/dmpwork
   export PATH=$DMPSWSYS/bin:$PATH
-  export PYTHONPATH=$DMPSWSYS/lib:$DMPSWWORK/lib:$PYTHONPATH
+  export PYTHONPATH=$DMPSWWORK/lib:$DMPSWSYS/lib:$PYTHONPATH
   export DMPSWGEOMETRY=$DMPSWSYS/share
   export DMPSWCONFIGPATH=$DMPSWSYS/share/Configuration
   if [ $LD_LIBRARY_PATH ];then

@@ -1,25 +1,35 @@
 #! /usr/bin/python
-#@
-#@ Loading the libraries of DAMPE SOFTWARE
-#@ 
-import os
+'''
+ *  $Id: DMPSW.py, 2014-08-08 12:36:50 DAMPE $
+ *  Author(s):
+ *    Chi WANG (chiwang@mail.ustc.edu.cn) 07/03/2014
+ *-----------------------------------------------------
+ *      All jop option files need import this file
+ *-----------------------------------------------------
+'''
+
+#-------------------------------------------------------------------
+# Load basic environment of DAMPE software
 import sys
 sys.setdlopenflags(0x100|0x2)
 import libDmpKernel as DmpKernel
 
-#@ Instantiate DAMPE objects
-#@---------------------------------------------------------------------------------------------------------------
-Core = DmpKernel.DmpCore.GetInstance()   #@ Get instance of DAMPE core               (MANDATORY!)
-SvcMgr  = Core.ServiceManager()          #@ Get instance of DAMPE service manager    (MANDATORY!) 
-AlgMgr  = Core.AlgorithmManager()        #@ Get instance of DAMPE algorithm manager  (MANDATORY!)
-DmpSysPath = os.getenv('DMPSWSYS')
-SysPath = os.getenv('DMPSWSYS')
-WorkPath = os.getenv('DMPSWWORK')
-IOSvc  = SvcMgr.Get("DmpIOSvc")
+#-------------------------------------------------------------------
+# load core
+Core = DmpKernel.DmpCore.GetInstance()
+
+#-------------------------------------------------------------------
+# get managers
+SvcMgr = Core.ServiceManager()
+AlgMgr = Core.AlgorithmManager()
 GeoMgr = DmpKernel.DmpGeoMgr()
 
-
-
-
+#-------------------------------------------------------------------
+# *
+# *  TODO: choose one IO service
+# *
+# get default service
+RootIOSvc = SvcMgr.Get("DmpRootIOSvc")
+IOSvc  = SvcMgr.Get("DmpIOSvc")
 
 

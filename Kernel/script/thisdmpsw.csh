@@ -17,13 +17,12 @@
 
 #+  Set installation environment of DAMPE offline software 
 #if ( ! ($?DMPSWSYS) ) then
-  #set thisDmpSW="`dirname $0`/.."
-  #setenv DMPSWSYS "`cd ${thisDmpSW};pwd`"
-  setenv DMPSWSYS "`pwd`"
-  #unset thisDmpSW
+  set thisDmpSW="`dirname $0`/.."
+  setenv DMPSWSYS "`cd ${thisDmpSW};pwd`"
+  unset thisDmpSW
   setenv DMPSWWORK "$HOME/dmpwork"
   setenv PATH ${DMPSWSYS}/bin:${PATH}
-  setenv PYTHONPATH ${DMPSWSYS}/lib:${DMPSWWORK}/lib:${PYTHONPATH}
+  setenv PYTHONPATH ${DMPSWWORK}/lib:${DMPSWSYS}/lib:${PYTHONPATH}
   setenv DMPSWGEOMETRY ${DMPSWSYS}/share
   setenv DMPSWCONFIGPATH ${DMPSWSYS}/share/Configuration
   if ( ($?LD_LIBRARY_PATH) ) then

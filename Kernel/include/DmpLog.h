@@ -1,12 +1,12 @@
 /*
- *  $Id: DmpLog.h, 2014-06-11 10:42:16 DAMPE $
+ *  $Id: DmpLog.h, 2014-09-10 09:40:22 DAMPE $
  *  Author(s):
  *    Chi WANG (chiwang@mail.ustc.edu.cn) 19/05/2014
  *    Andrii Tykhonov (Andrii.Tykhonov@cern.ch) 22/05/2014
 */
 
-#ifndef DMP_LOG_H
-#define DMP_LOG_H
+#ifndef DmpLog_H
+#define DmpLog_H
 
 #include <iostream>
 #include <iomanip>
@@ -22,30 +22,27 @@ namespace DmpLog{
 
 //-------------------------------------------------------------------
   void SetLogLevel(const std::string&);
-  void ShowLogHeader(bool show=false);
+  void SetLogHeader(const std::string&);
 
 //-------------------------------------------------------------------
   extern short  logLevel;
-  extern bool   logShowFunctionHeader;
+  extern bool   logHeader;
 }
 
 #define DmpLogDebug   if(DmpLog::logLevel >= DmpLog::DEBUG) \
-  std::cout<<"  DEBUG:   ["<<  (DmpLog::logShowFunctionHeader? __PRETTY_FUNCTION__:"") <<"] "
-// *
-// *  TODO: only need to show function header for DEBUG
-  // use:       std::cout<<"  INFO:    "
-// *
+  std::cout<<"  DEBUG:   ["<<__PRETTY_FUNCTION__<<"("<<__LINE__<<")"<<"]  "
+
 #define DmpLogInfo    if(DmpLog::logLevel >= DmpLog::INFO)\
-  std::cout<<"  INFO:    ["<<  (DmpLog::logShowFunctionHeader? __PRETTY_FUNCTION__:"") <<"] "
+  std::cout<<"  INFO:    ["<<(DmpLog::logHeader? __PRETTY_FUNCTION__:"")<<"]  "
 
 #define DmpLogWarning if(DmpLog::logLevel >= DmpLog::WARNING)\
-  std::cout<<"  WARNING: ["<<  (DmpLog::logShowFunctionHeader? __PRETTY_FUNCTION__:"") <<"] "
+  std::cout<<"  WARNING: ["<<(DmpLog::logHeader? __PRETTY_FUNCTION__:"")<<"]  "
 
 #define DmpLogError if(DmpLog::logLevel >= DmpLog::ERROR)\
-  std::cout<<"  ERROR:   ["<<  (DmpLog::logShowFunctionHeader? __PRETTY_FUNCTION__:"") <<"] "
+  std::cout<<"  ERROR:   ["<<(DmpLog::logHeader? __PRETTY_FUNCTION__:"")<<"]  "
 
 #define DmpLogEndl std::endl
 
-#endif // DMP_LOG_H
+#endif
 
 

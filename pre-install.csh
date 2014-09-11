@@ -1,6 +1,6 @@
 #!/bin/csh
 #+
-#+  $Id: pre-install.csh, 2014-05-09 15:16:54 DAMPE $
+#+  $Id: pre-install.csh, 2014-08-08 11:11:10 DAMPE $
 #+  Author(s):
 #+    Chi WANG (chiwang@mail.ustc.edu.cn) 26/02/2013
 #+    Fabio GARGANO  (fabio.gargano@ba.infn.it)    06/02/2014
@@ -26,16 +26,10 @@ end
 
 #+  Event
 #----------------------------------------------------
-set package="Event"
 echo "---->   Creating Dictionary..."
 
-foreach subDir (`ls $package`)
-  if(! -d $package/$subDir ) then
-    continue
-  endif
-  pushd $package/$subDir >&/dev/null
-  \rm -f ./*/Dictionary*
-  ./createDictionary
-  popd >&/dev/null
-end
+pushd Event >&/dev/null
+\rm -f ./*/Dictionary*
+./createDictionary
+popd >&/dev/null
 

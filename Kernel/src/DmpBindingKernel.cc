@@ -1,13 +1,11 @@
 /*
- *  $Id: DmpBindingKernel.cc, 2014-06-16 09:44:38 DAMPE $
+ *  $Id: DmpBindingKernel.cc, 2014-09-10 09:54:59 DAMPE $
  *  Author(s):
  *    Chi WANG (chiwang@mail.ustc.edu.cn) 07/03/2014
 */
 
 #include <boost/python.hpp>
 
-#include "DmpRunMode.h"
-#include "DmpDetectorID.h"
 #include "DmpVSvc.h"
 #include "DmpVAlg.h"
 #include "DmpAlgorithmManager.h"
@@ -60,31 +58,11 @@ struct DmpVSvcWrapper : public DmpVSvc, boost::python::wrapper<DmpVSvc>{
   }
 };
 
-//-------------------------------------------------------------------
-// *
-// *  TODO: if we take DmpCore::Set(string type, string value), we don't need SetLogLevel
-// *
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SetLogLevel_Wrap,DmpCore::SetLogLevel,1,2)
+//BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SetLogLevel_Wrap,DmpCore::SetLogLevel,1,2)
 
 //-------------------------------------------------------------------
 BOOST_PYTHON_MODULE(libDmpKernel){
   using namespace boost::python;
-  // DmpRunMode
-  enum_<DmpRunMode::Type>("DmpRunMode")
-    .value("kUnknow",   DmpRunMode::kUnknow)
-    .value("k0Compress",DmpRunMode::k0Compress)
-    .value("kCompress", DmpRunMode::kCompress)
-    .value("kCalPed",   DmpRunMode::kCalPed)
-    .value("kCalDAC",   DmpRunMode::kCalDAC)
-  ;
-  // DmpDetectorID
-  enum_<DmpDetectorID::Type>("DmpDetectorID")
-    .value("kPsd",  DmpDetectorID::kPsd)
-    .value("kStk",  DmpDetectorID::kStk)
-    .value("kBgo",  DmpDetectorID::kBgo)
-    .value("kNud",  DmpDetectorID::kNud)
-    .value("kWhole",DmpDetectorID::kWhole)
-  ;
   // DmpVSvc
   class_<DmpVSvcWrapper,boost::noncopyable>("DmpVSvc",init<std::string>())
     .def("Initialize",  pure_virtual(&DmpVSvc::Initialize))
@@ -117,18 +95,11 @@ BOOST_PYTHON_MODULE(libDmpKernel){
     .def("GetInstance", &DmpCore::GetInstance,return_value_policy<reference_existing_object>())
     .staticmethod("GetInstance")
     .def("Initialize",  &DmpCore::Initialize)
-// *
-// *  TODO: choose one run
-// *
     .def("Run",         &DmpCore::Run)
-    .def("run",         &DmpCore::run)
+    .def("ExecuteEventID",&DmpCore::ExecuteEventID)
+    .def("ExecuteEventTime",&DmpCore::ExecuteEventTime)
     .def("Finalize",    &DmpCore::Finalize)
     .def("Set", &DmpCore::Set)
-// *
-// *  TODO: delete SetXXX, use Set(string type,string value)(above)
-// *
-    .def("SetLogLevel", &DmpCore::SetLogLevel, SetLogLevel_Wrap())
-    .def("SetMaxEventNumber", &DmpCore::SetMaxEventNumber)
     .def("AlgorithmManager",    &DmpCore::AlgorithmManager,return_value_policy<reference_existing_object>())
     .def("ServiceManager",      &DmpCore::ServiceManager,return_value_policy<reference_existing_object>())
   ;

@@ -156,6 +156,7 @@ bool DmpIOSvc::Initialize(){
     fOutRootFile->cd();
 
   }
+  /*
   else{
     fOutFileName = fTag + fInFileTag + Timestamp() +".root";
     if(fUserOutFileName!=std::string("")){
@@ -165,6 +166,7 @@ bool DmpIOSvc::Initialize(){
     fOutRootFile = new TFile((TString)(fOutFilePath+fOutFileName),"RECREATE");
     fOutRootFile->cd();
   }
+  */
 
   DmpLogDebug<<"[DmpIOSvc::Initialize] ... initialization done "<<DmpLogEndl;  
   return true;
@@ -205,8 +207,8 @@ bool DmpIOSvc::Finalize(){
     DmpLogInfo<<"Result in "<<fOutFilePath+fOutFileName<<DmpLogEndl;
     fOutRootFile = new TFile((TString)(fOutFilePath+fOutFileName),"recreate");
   }
-  */
   fOutRootFile->cd();
+  */
 
   for(short i=0;i<fOutTreeSet.size();++i){
     DmpLogInfo<<"\tTree: "<<fOutTreeSet[i]->GetName()<<", entries = "<<fOutTreeSet[i]->GetEntries()<<DmpLogEndl;
@@ -222,10 +224,12 @@ bool DmpIOSvc::Finalize(){
     fInRootFile->Close();
     delete fInRootFile;
   }
+  /*
   if("INPUT" != fOutFileName && "NO" != fOutFileName){
     fOutRootFile->Close();
     delete fOutRootFile;
   }
+  */
   DmpLogDebug<<DmpLogEndl;
   return true;
 }
@@ -376,4 +380,4 @@ TClonesArray* DmpIOSvc::GetOutCollection(std::string collectrionName,char* class
 }
 */
 
-
+DmpIOSvc *gIOSvc = DmpIOSvc::GetInstance();

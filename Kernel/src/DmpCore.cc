@@ -1,5 +1,5 @@
 /*
- *  $Id: DmpCore.cc, 2014-06-11 20:59:15 DAMPE $
+ *  $Id: DmpCore.cc, 2014-09-11 15:02:14 DAMPE $
  *  Author(s):
  *    Chi WANG (chiwang@mail.ustc.edu.cn) 22/04/2014
 */
@@ -8,6 +8,7 @@
 
 #include "DmpCore.h"
 #include "DmpIOSvc.h"
+#include "DmpRootIOSvc.h"
 
 //-------------------------------------------------------------------
 DmpCore::DmpCore()
@@ -18,22 +19,22 @@ DmpCore::DmpCore()
   fStartTime(0),
   fStopTime(0),
   fInitializeDone(false),
-  fTerminateRun(false)
+  fTerminateRun(false),
+  fCurrentEventID(0)    // must == 0
 {
-  std::cout<<"*******************************************************"<<std::endl;
-  // do not use DmpLogxxx at here
+  std::cout<<"**************************************************"<<std::endl;
   std::cout<<"      Offline software of DAMPE (DMPSW)"<<std::endl;
-  std::cout<<"      version:  1.0.1"<<std::endl;
-  std::cout<<"*******************************************************"<<std::endl;
+  std::cout<<"      version:  1.0.3"<<std::endl;
+  std::cout<<"**************************************************"<<std::endl;
   fAlgMgr = DmpAlgorithmManager::GetInstance();
   fSvcMgr = DmpServiceManager::GetInstance();
-  fSvcMgr->Append(DmpIOSvc::GetInstance());
+  fSvcMgr->Append(gIOSvc);
+  fSvcMgr->Append(gRootIOSvc);
   OptMap.insert(std::make_pair("LogLevel",  0));    // value: None, Error, Warning, Info, Debug
-  OptMap.insert(std::make_pair("EventNumber",1));   // value: any number
-  OptMap.insert(std::make_pair("StartTime", 2));    // value: format 20131231-1430
-  OptMap.insert(std::make_pair("StopTime",  3));    // value: format 20131231-1430
-  OptMap.insert(std::make_pair("LogHeader", 4));    // value: on, off
-  //OptMap.insert(std::make_pair("Seed",  4));        // value: any number
+  OptMap.insert(std::make_pair("LogHeader", 1));    // value: None, Error, Warning, Info, Debug
+  OptMap.insert(std::make_pair("EventNumber",2));   // value: any number
+  OptMap.insert(std::make_pair("StartTime", 3));    // value: format 20131231-1430
+  OptMap.insert(std::make_pair("StopTime",  4));    // value: format 20131231-1430
 }
 
 //-------------------------------------------------------------------
@@ -48,39 +49,18 @@ bool DmpCore::Initialize(){
   std::cout<<"\n  [DmpCore::Initialize] Initialize..."<<std::endl;
   if(not fSvcMgr->Initialize()) return false;
   if(not fAlgMgr->Initialize()) return false;
-  if(-1 == fMaxEventNo){
-    fMaxEventNo = 1234567890;
-  }
+  gRootIOSvc->CreateOutRootFile();
+  gRootIOSvc->PrepareMetaData();
   if(0 == fStopTime){
     fStopTime = DeltaTime("21130101-0000");
   }
+  std::cout<<"  [DmpCore::Initialize] ... initialized successfully"<<std::endl;
   fInitializeDone = true;
-  std::cout<<"  [DmpCore::Initialize] ... initialized successfully\n"<<std::endl;
   return true;
 }
 
 //-------------------------------------------------------------------
 bool DmpCore::Run(){
-  if(not fInitializeDone) return false;
-// *
-// *  TODO: use cut of time range??
-// *
-  for(long i=0;i<fMaxEventNo;++i){
-
-    DmpLogDebug<<"event ID = "<<i<<DmpLogEndl;
-    if(!DmpIOSvc::GetInstance()->ReadEvent()) return false;
-    if(!fAlgMgr->ProcessOneEvent()) return false;
-    if(!DmpIOSvc::GetInstance()->FillEvent()) return false;
-    DmpLogDebug<<" ... finished event"<<DmpLogEndl<<DmpLogEndl<<DmpLogEndl;
-
-    if(fAlgMgr->GetEventLoopTerminateSignal()) break;
-    if(DmpIOSvc::GetInstance()->GetEventLoopTerminateSignal()) break;
-  }
-  return true;
-}
-
-//-------------------------------------------------------------------
-bool DmpCore::run(){
   if(not fInitializeDone){
     return false;
   }
@@ -88,20 +68,52 @@ bool DmpCore::run(){
 // *
 // *  TODO: use cut of time range??
 // *
-  long evtID = 0;
-  while (false == fTerminateRun){
-    if(evtID%1000 == 0){
-      DmpLogInfo<<"\tevent ID = "<<evtID<<DmpLogEndl;
-    }
-    if(fAlgMgr->ProcessOneEvent()){
-      DmpIOSvc::GetInstance()->FillEvent();
-    }
-    ++evtID;
-    if(evtID == fMaxEventNo){
+  while(not fTerminateRun){
+    if(fCurrentEventID == fMaxEventNo){
       fTerminateRun = true;
+      break;
+    }else if(fCurrentEventID%5000 == 0){
+      std::cout<<"\t [DmpCore::Run] event ID = "<<std::dec<<fCurrentEventID<<std::endl;
+    }
+    if(gRootIOSvc->PrepareEvent(fCurrentEventID) && gIOSvc->ReadEvent()){
+      if(fAlgMgr->ProcessOneEvent()){
+        gRootIOSvc->FillData("Event");
+        gIOSvc->FillEvent();
+      }
+      ++fCurrentEventID;
+    }else{
+      fTerminateRun = true;
+      break;
     }
   }
-  std::cout<<"  [DmpCore::Run] Done\n"<<std::endl;
+  std::cout<<"  [DmpCore::Run] Done"<<std::endl;
+  return true;
+}
+
+//-------------------------------------------------------------------
+bool DmpCore::ExecuteEventID(const long &evtID){
+  if(not fInitializeDone){
+    return false;
+  }
+  fCurrentEventID = evtID;
+  std::cout<<"\n  [DmpCore::ExecuteEvent] execute event: ID = "<<fCurrentEventID<<std::endl;
+  if(gRootIOSvc->PrepareEvent(fCurrentEventID)){
+    fAlgMgr->ProcessOneEvent();
+  }
+  std::cout<<"  [DmpCore::ExecuteEvent] Done\n"<<std::endl;
+  return true;
+}
+
+//-------------------------------------------------------------------
+bool DmpCore::ExecuteEventTime(const std::string &time){
+  if(not fInitializeDone){
+    return false;
+  }
+  std::cout<<"\n  [DmpCore::ExecuteEvent] event time = "<<time<<std::endl;
+// *
+// *  TODO:  finish me
+// *
+  std::cout<<"  [DmpCore::ExecuteEvent] Done\n"<<std::endl;
   return true;
 }
 
@@ -111,61 +123,45 @@ bool DmpCore::Finalize(){
   //*
   //* Important! First, finalize algorithms, then services!
   //*
-//-------------------------------------------------------------------
-  //* if fAlgMgr->Finalize() false, will not call fSvMgr->Finialize(), that what we do NOT wanted
-  //if(not fAlgMgr->Finalize())   return false;
   fAlgMgr->Finalize();
-  //if(not fSvcMgr->Finalize())   return false;
   fSvcMgr->Finalize();
-  std::cout<<"  [DmpCore::Finalize] ... finalized successfully\n"<<std::endl;
+  std::cout<<"  [DmpCore::Finalize] ... finalized successfully"<<std::endl;
   return true;
 }
 
 //-------------------------------------------------------------------
 #include <boost/lexical_cast.hpp>
 void DmpCore::Set(const std::string &type,const std::string &value){
-  if(OptMap.find(type) == OptMap.end()){
-    DmpLogError<<"No argument type: "<<type<<DmpLogEndl;
-    throw;
-  }
   switch(OptMap[type]){
-    case 0:
-    {// LogLevel
+    case 0: // LogLevel
+    {
       DmpLog::SetLogLevel(value);
       break;
     }
-    case 1:
-    {// EventNumber
+    case 1: // LogHeader
+    {
+      DmpLog::SetLogHeader(value);
+      break;
+    }
+    case 2: // EventNumber
+    {
       fMaxEventNo = boost::lexical_cast<long>(value);
       break;
     }
-    case 2:
-    {// StartTime
+    case 3: // StartTime
+    {
       fStartTime = DeltaTime(value);
       break;
     }
-    case 3:
-    {// StopTime
+    case 4: // StopTime
+    {
       fStopTime = DeltaTime(value);
       break;
     }
-    case 4:
-    {// LogHeader
-      if("on" == value || "On" == value || "ON" == value){
-        DmpLog::ShowLogHeader(true);
-      }else if("off" == value || "Off" == value || "OFF" == value){
-        DmpLog::ShowLogHeader(false);
-      }
-      break;
+    default:
+    {
+      DmpLogError<<"No argument type: "<<type<<DmpLogEndl;
     }
-  }
-}
-
-//-------------------------------------------------------------------
-void DmpCore::SetLogLevel(const std::string &l,const short &s)const{
-  DmpLog::SetLogLevel(l);
-  if(1 == s){
-    DmpLog::ShowLogHeader(true);
   }
 }
 
@@ -197,7 +193,7 @@ bool DmpCore::EventInTimeWindow(const long &t) const{
   return false;
 }
 
-// Global DAMPE core
+//-------------------------------------------------------------------
 DmpCore *gCore = DmpCore::GetInstance();
 
 

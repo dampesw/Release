@@ -1,0 +1,23 @@
+/*
+ *  $Id: ReleaseNote.Kernel, 2014-08-20 18:30:12 DAMPE $
+ *  Author(s):
+ *    =========    DMPSW group    ============
+*/
+
+--->    2014-08-20  18:30:03
+    1.  add Fee number for all subDetector, in DmpParameterxxx.h
+
+--->    2014-08-17  17:21:37
+    1.  create dmpsw-expand, so delete dmpNew{Alg|Svc|Evt}
+
+--->    2014-08-15  11:04:41
+    1.  update dmpNewAlg, link $DMPSWWORK/include and $DMPSWWORK/lib
+    2.  update dmpsw-config, link $DMPSWWORK/include and $DMPSWWORK/lib
+    3.  update dmpNewEvt, for SConstruct file. install include/* intto $DMPSWWORK/include
+    4.  not use TClonesArray any more, so data buffer and IO service delete functions about TClonesArry.
+    5.  add some function of DmpRootIOSvc in order to get input and output file name
+
+--->    2014-08-08  12:38:24
+    1.  setup Kernel package
+    2.  first release of Kernel
+

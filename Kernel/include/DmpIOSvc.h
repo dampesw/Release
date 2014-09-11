@@ -1,5 +1,5 @@
 /*
- *  $Id: DmpIOSvc.h, 2014-06-11 20:51:24 DAMPE $
+ *  $Id: DmpIOSvc.h, 2014-09-11 10:49:54 DAMPE $
  *  Author(s):
  *    Chi WANG (chiwang@mail.ustc.edu.cn) 20/05/2014
  *    Andrii Tykhonov (Andrii.Tykhonov@cern.ch) 28/05/2014
@@ -25,7 +25,7 @@
 
 class TObject;
 class TFile;
-class TTree;
+//class TTree;
 
 class DmpIOSvc : public DmpVSvc{
 /* 
@@ -183,6 +183,9 @@ private:
   std::vector<std::string>  fInputContainerNames;
   std::vector<void*>        fInputContainers;
 };
+
+//-------------------------------------------------------------------
+extern DmpIOSvc *gIOSvc;
 
 #endif
 

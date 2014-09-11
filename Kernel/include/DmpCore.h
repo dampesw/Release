@@ -1,5 +1,5 @@
 /*
- *  $Id: DmpCore.h, 2014-06-11 09:34:10 DAMPE $
+ *  $Id: DmpCore.h, 2014-09-05 15:34:04 DAMPE $
  *  Author(s):
  *    Chi WANG (chiwang@mail.ustc.edu.cn) 22/04/2014
 */
@@ -26,25 +26,14 @@ public:
 
 public:     // binding functions
   bool Initialize();            // execute all elements' Initialize() in all *Mgr
-// *
-// *  TODO: we need to choose one as official version.
-// *
   bool Run();                   // run one job
-  bool run();                   // run one job
+  bool ExecuteEventID(const long &evtID);         // just execute event ID = evtID
+  bool ExecuteEventTime(const std::string &time);   // execute one event, Event time = time
   bool Finalize();              // execute all elements' Finalize() in all *Mgr
 
 public:
-// *
-// *  TODO: we'd better delete SetXXX(),
-// *    we can use Set(const std::string &type,const std::string &value) in job option file
-// *        because DmpVAlg and DmpVSvc use the same set method, Set(const std::string &type, const std::string &value)
-// *
-  void SetLogLevel(const std::string&, const short &s=0) const;
-  void SetMaxEventNumber(const long &i) {fMaxEventNo = i;}
-  //void SetTimeWindow(const std::string &type,const int &YMD,const int &HMS);
-
-public:
   const long& GetMaxEventNumber() const {return fMaxEventNo;}
+  const long& GetCurrentEventID() const {return fCurrentEventID;}
   bool EventInTimeWindow(const long &second) const;
   const bool& InitializeDone() const {return fInitializeDone;}
 
@@ -72,6 +61,9 @@ private:
   bool      fInitializeDone;        // default is false
   bool      fTerminateRun;          // concrete algorithm could set this value
   std::map<std::string,short>    OptMap; // option map
+
+private:
+  long      fCurrentEventID;        // the current event ID (processing)
 
 };
 

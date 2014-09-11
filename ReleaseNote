@@ -1,0 +1,18 @@
+/*
+ *  $Id: ReleaseNote, 2014-08-08 12:30:23 DAMPE $
+ *  Author(s):
+ *    =========    DMPSW group    ============
+ *
+*/
+
+--->    (next release)2014-08-15  20:08:19
+    1.  setup BgoBaseLib
+
+--->    2014-08-15  20:08:19
+    1.  update dmpNewAlg, dmpNewEvt, dmpsw-config
+    1.  Kernel.  IO Svc and Data buffer. delete functions about TClonesArray
+
+--->    2014-08-08  13:08:24
+    1.  setup first release of Kernel, Event
+
+

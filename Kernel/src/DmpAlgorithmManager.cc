@@ -1,5 +1,5 @@
 /*
- *  $Id: DmpAlgorithmManager.cc, 2014-06-16 10:49:31 DAMPE $
+ *  $Id: DmpAlgorithmManager.cc, 2014-09-06 11:07:27 DAMPE $
  *  Author(s):
  *    Chi WANG (chiwang@mail.ustc.edu.cn) 25/03/2014
 */
@@ -21,23 +21,11 @@ DmpAlgorithmManager::~DmpAlgorithmManager(){
 //-------------------------------------------------------------------
 bool DmpAlgorithmManager::ProcessOneEvent(){
   for(std::list<DmpVAlg*>::iterator it = fElements.begin();it != fElements.end();++it){
-    if(not (*it)->ProcessThisEvent())  return false;
+    if(not (*it)->ProcessThisEvent()){
+      DmpLogError<<"  [DmpAlgorithmManager::ProcessOneEvent] "<<(*it)->Name()<<" failed...\n"<<DmpLogEndl;
+      return false;
+    }
   }
   return true;
-}
-
-//-------------------------------------------------------------------
-  /*
-// *  TODO: 
-   *    we'd better delete GetEventLoopTerminateSignal(), if a algorithm wants to terminate a run,
-   *    1.  include DmpCore.h
-   *    2.  gCore->TerminateRun(), in DmpVAlg::ProcessThisEvent()
-   */
-bool DmpAlgorithmManager::GetEventLoopTerminateSignal(){
-  //-------------------------------------------------------------------
-  for(std::list<DmpVAlg*>::iterator it = fElements.begin();it != fElements.end();++it){
-    if ((*it)->GetEventLoopTerminateSignal()) return true;
-  }
-  return false;
 }
 

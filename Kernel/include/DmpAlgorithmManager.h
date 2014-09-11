@@ -24,13 +24,6 @@ public:
   }
   ~DmpAlgorithmManager();
   bool ProcessOneEvent();
-  bool GetEventLoopTerminateSignal();
-  /*
-// *  TODO: 
-   *    we'd better delete GetEventLoopTerminateSignal(), if a algorithm wants to terminate a run,
-   *    1.  include DmpCore.h
-   *    2.  gCore->TerminateRun(), in DmpVAlg::ProcessThisEvent()
-   */
 
 private:
   DmpAlgorithmManager();

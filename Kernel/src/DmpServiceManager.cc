@@ -18,11 +18,3 @@ DmpServiceManager::~DmpServiceManager(){
   std::cout<<"===>  "<<Name()<<" deleted"<<std::endl;
 }
 
-/*
-bool DmpServiceManager::ProcessOneEvent(){
-  for(std::list<DmpVSvc*>::iterator it = fElements.begin();it != fElements.end();++it){
-    if(not (*it)->ProcessThisEvent())  return false;
-  }
-  return true;
-}*/
-
