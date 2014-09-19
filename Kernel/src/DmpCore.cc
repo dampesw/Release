@@ -89,33 +89,6 @@ bool DmpCore::Run(){
 }
 
 //-------------------------------------------------------------------
-bool DmpCore::ExecuteEventID(const long &evtID){
-  if(not fInitializeDone){
-    return false;
-  }
-  fCurrentEventID = evtID;
-  std::cout<<"\n  [DmpCore::ExecuteEvent] execute event: ID = "<<fCurrentEventID<<std::endl;
-  if(gRootIOSvc->PrepareEvent(fCurrentEventID)){
-    fAlgMgr->ProcessOneEvent();
-  }
-  std::cout<<"  [DmpCore::ExecuteEvent] Done\n"<<std::endl;
-  return true;
-}
-
-//-------------------------------------------------------------------
-bool DmpCore::ExecuteEventTime(const std::string &time){
-  if(not fInitializeDone){
-    return false;
-  }
-  std::cout<<"\n  [DmpCore::ExecuteEvent] event time = "<<time<<std::endl;
-// *
-// *  TODO:  finish me
-// *
-  std::cout<<"  [DmpCore::ExecuteEvent] Done\n"<<std::endl;
-  return true;
-}
-
-//-------------------------------------------------------------------
 bool DmpCore::Finalize(){
   std::cout<<"\n  [DmpCore::Finalize] Finalize..."<<std::endl;
   //*
