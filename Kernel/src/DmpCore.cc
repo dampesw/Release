@@ -35,6 +35,7 @@ DmpCore::DmpCore()
   OptMap.insert(std::make_pair("EventNumber",2));   // value: any number
   OptMap.insert(std::make_pair("StartTime", 3));    // value: format 20131231-1430
   OptMap.insert(std::make_pair("StopTime",  4));    // value: format 20131231-1430
+  OptMap.insert(std::make_pair("FromEvent",5));     // value: any number
 }
 
 //-------------------------------------------------------------------
@@ -68,11 +69,8 @@ bool DmpCore::Run(){
 // *
 // *  TODO: use cut of time range??
 // *
-  while(not fTerminateRun){
-    if(fCurrentEventID == fMaxEventNo){
-      fTerminateRun = true;
-      break;
-    }else if(fCurrentEventID%5000 == 0){
+  while(not (fTerminateRun||(fCurrentEventID==fMaxEventNo))){
+    if(fCurrentEventID%5000 == 0){
       std::cout<<"\t [DmpCore::Run] event ID = "<<std::dec<<fCurrentEventID<<std::endl;
     }
     if(gRootIOSvc->PrepareEvent(fCurrentEventID) && gIOSvc->ReadEvent()){
@@ -156,6 +154,11 @@ void DmpCore::Set(const std::string &type,const std::string &value){
     case 4: // StopTime
     {
       fStopTime = DeltaTime(value);
+      break;
+    }
+    case 5: // FromEvent
+    {
+      fCurrentEventID = boost::lexical_cast<long>(value);
       break;
     }
     default:
