@@ -1,5 +1,5 @@
 /*
- *  $Id: DmpAlgorithmManager.cc, 2014-09-19 15:21:36 DAMPE $
+ *  $Id: DmpAlgorithmManager.cc, 2014-09-21 13:22:11 DAMPE $
  *  Author(s):
  *    Chi WANG (chiwang@mail.ustc.edu.cn) 25/03/2014
 */
@@ -10,7 +10,6 @@
 DmpAlgorithmManager::DmpAlgorithmManager()
  :DmpElementManager<DmpVAlg>("Algorithm manager")
 {
-  std::cout<<"===>  "<<Name()<<" created"<<std::endl;
 }
 
 //-------------------------------------------------------------------

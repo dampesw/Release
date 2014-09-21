@@ -24,7 +24,7 @@ DmpCore::DmpCore()
 {
   std::cout<<"**************************************************"<<std::endl;
   std::cout<<"      Offline software of DAMPE (DMPSW)"<<std::endl;
-  std::cout<<"      version:  1.1.0"<<std::endl;
+  std::cout<<"      version:  1.1.0(dampesw)"<<std::endl;
   std::cout<<"**************************************************"<<std::endl;
   fAlgMgr = DmpAlgorithmManager::GetInstance();
   fSvcMgr = DmpServiceManager::GetInstance();
@@ -70,9 +70,6 @@ bool DmpCore::Run(){
 // *  TODO: use cut of time range??
 // *
   while(not (fTerminateRun||(fCurrentEventID==fMaxEventNo))){
-    if(fCurrentEventID%5000 == 0){
-      std::cout<<"\t [DmpCore::Run] event ID = "<<std::dec<<fCurrentEventID<<std::endl;
-    }
     if(gRootIOSvc->PrepareEvent(fCurrentEventID) && gIOSvc->ReadEvent()){
       if(fAlgMgr->ProcessOneEvent()){
         gRootIOSvc->FillData("Event");
