@@ -9,6 +9,7 @@
 #include "DmpCore.h"
 #include "DmpIOSvc.h"
 #include "DmpRootIOSvc.h"
+#include "DmpDataBuffer.h"
 
 //-------------------------------------------------------------------
 DmpCore::DmpCore()
@@ -30,8 +31,9 @@ DmpCore::DmpCore()
   fSvcMgr = DmpServiceManager::GetInstance();
   fSvcMgr->Append(gIOSvc);
   fSvcMgr->Append(gRootIOSvc);
+  fSvcMgr->Append(gDataBuffer);
   OptMap.insert(std::make_pair("LogLevel",  0));    // value: None, Error, Warning, Info, Debug
-  OptMap.insert(std::make_pair("LogHeader", 1));    // value: None, Error, Warning, Info, Debug
+  OptMap.insert(std::make_pair("LogHeader", 1));    // value: On, Off 
   OptMap.insert(std::make_pair("EventNumber",2));   // value: any number
   OptMap.insert(std::make_pair("StartTime", 3));    // value: format 20131231-1430
   OptMap.insert(std::make_pair("StopTime",  4));    // value: format 20131231-1430
@@ -50,7 +52,6 @@ bool DmpCore::Initialize(){
   std::cout<<"\n  [DmpCore::Initialize] Initialize..."<<std::endl;
   if(not fSvcMgr->Initialize()) return false;
   if(not fAlgMgr->Initialize()) return false;
-  gRootIOSvc->CreateOutRootFile();
   gRootIOSvc->PrepareMetaData();
   if(0 == fStopTime){
     fStopTime = DeltaTime("21130101-0000");
