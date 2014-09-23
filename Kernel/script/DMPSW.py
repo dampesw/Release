@@ -23,6 +23,9 @@ Core = DmpKernel.DmpCore.GetInstance()
 SvcMgr = Core.ServiceManager()
 AlgMgr = Core.AlgorithmManager()
 GeoMgr = DmpKernel.DmpGeoMgr()
+# environments
+SysPath = os.environ["DMPSWSYS"]
+WorkPath = os.environ["DMPSWWORK"]
 
 #-------------------------------------------------------------------
 # *
