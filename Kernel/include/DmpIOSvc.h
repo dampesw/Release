@@ -45,6 +45,7 @@ public:
   bool Initialize();
   bool Finalize();
   bool GetEventLoopTerminateSignal() {return fInEOF;} 
+  std::string GetUserOutFileName()const{return fUserOutFileName;}
 
 public:
   template <typename T> bool GetContainer(const std::string &thePath,T *&dataPtr){

@@ -11,6 +11,8 @@
 #include "DmpIOSvc.h"
 #include "DmpCore.h"
 #include "TClonesArray.h"
+#include "DmpCore.h"
+#include "DmpRootIOSvc.h"
 
 //-------------------------------------------------------------------
 DmpIOSvc::DmpIOSvc()
@@ -34,7 +36,6 @@ DmpIOSvc::DmpIOSvc()
   OptMap.insert(std::make_pair("OutData/Timestamp", 4));
   OptMap.insert(std::make_pair("OutData/FileName", 5));
   OptMap.insert(std::make_pair("OutData/NoOutput", 6));
-
   /*
   fCollections    = new std::vector<TClonesArray*>();
   fContainers     = new std::vector<TObject*>();
@@ -139,7 +140,8 @@ bool DmpIOSvc::Initialize(){
       DmpLogError<<"Failed to open input ROOT file: "<<fInDataName<<DmpLogEndl;
       throw;
     }
-    for(int i=0; i< fInRootFile->GetListOfKeys()->GetSize();i++){
+    for(int i=0; i< fInRootFile->GetListOfKeys()->GetSize();i++){      
+      if(std::string(fInRootFile->GetListOfKeys()->At(i)->GetName())+"/" != std::string(COLLECTION_TREE_NAME)) continue;  //SO FAR ONLY CollectionTree is read
       fInTreeSet.push_back(dynamic_cast<TTree*>(fInRootFile->Get(fInRootFile->GetListOfKeys()->At(i)->GetName())));
     }
     fInEntry = 0;
@@ -210,6 +212,7 @@ bool DmpIOSvc::Finalize(){
   fOutRootFile->cd();
   */
 
+  gRootIOSvc->ActiveOutputRootFile();
   for(short i=0;i<fOutTreeSet.size();++i){
     DmpLogInfo<<"\tTree: "<<fOutTreeSet[i]->GetName()<<", entries = "<<fOutTreeSet[i]->GetEntries()<<DmpLogEndl;
     fOutTreeSet[i]->Write();
@@ -243,28 +246,33 @@ bool DmpIOSvc::ReadEvent(){
   }
 
   //* Read the trees
-  DmpLogDebug<<"[DmpIOSvc::ReadEvent] Read event ... "<<DmpLogEndl;
+  DmpLogDebug<<"[DmpIOSvc::ReadEvent] Read event ... "<< fInEntry <<DmpLogEndl;
   for(short i=0;i<fInTreeSet.size();++i){
-
+    if(std::string(fInTreeSet[i]->GetName()) + "/" != std::string(COLLECTION_TREE_NAME)) continue;  //SO FAR ONLY CollectionTree is read
+    
     /*
     std::cout<<"\n\n\n\nfInTreeSet[i]->GetName() :"<<fInTreeSet[i]->GetName()<<std::endl;
     std::cout<<"fInEntry :"<<fInEntry<<std::endl;
     std::cout<<"fInTreeSet[i]]->GetEntries() :"<<fInTreeSet[i]->GetEntries()<<std::endl;
-    std::cout<<"2a"<<std::endl;
-    */
+    std::cout<<"1"<<std::endl;
+    */     
+    
 
     fInTreeSet[i]->GetEntry(fInEntry);
 
-    //std::cout<<"2"<<fInEntry<<std::endl;
   }
   fInEntry++;
 
   //* Check if reached end of file
-  for(short i=0;i<fInTreeSet.size();++i){
-    if(fInEntry>=fInTreeSet[i]->GetEntries())
-    fInEOF = true;
+  for(short i=0;i<fInTreeSet.size();++i){    
+    if(std::string(fInTreeSet[i]->GetName()) + "/" != std::string(COLLECTION_TREE_NAME)) continue;   //SO FAR ONLY CollectionTree is read
+    if(fInEntry<fInTreeSet[i]->GetEntries()) continue;
+    //fInEOF = true;
+    gCore->TerminateRun();
     break;
   }
+
+  
 
   //* All ok ==> return true
   DmpLogDebug<<"[DmpIOSvc::ReadEvent] ... finished reading event"<<DmpLogEndl;

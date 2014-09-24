@@ -137,6 +137,8 @@ void DmpRootIOSvc::CreateOutRootFile(){
     }
     fOutRootFile = new TFile(fOutFileName.string().c_str(),"RECREATE");
     std::cout<<"\tOutput file:\t"<<fOutFileName.string()<<DmpLogEndl;
+  }else{
+    CreateOutputFromDmpIOSvc();
   }
 }
 
@@ -273,4 +275,20 @@ void DmpRootIOSvc::FillData(const std::string &floder){
 
 //-------------------------------------------------------------------
 DmpRootIOSvc *gRootIOSvc = DmpRootIOSvc::GetInstance();
+
+//-------------------------------------------------------------------
+#include "DmpIOSvc.h"
+void DmpRootIOSvc::CreateOutputFromDmpIOSvc(){
+  std::string name = gIOSvc->GetUserOutFileName();
+  if("" != name){
+    fOutRootFile = new TFile(name.c_str(),"RECREATE");
+  }
+}
+
+//-------------------------------------------------------------------
+void DmpRootIOSvc::ActiveOutputRootFile()const{
+  fOutRootFile->cd();
+}
+
+
 

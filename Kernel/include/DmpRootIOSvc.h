@@ -43,6 +43,7 @@ public:
    */
   bool Initialize();
   bool Finalize();
+  void ActiveOutputRootFile()const;     // needed by DmpIOSvc
 
 public:
   bool WriteValid(const std::string &folderName,const std::string &treeName,const std::string &branchName); // in write list, no branch
@@ -72,6 +73,7 @@ public:
 private:
   DmpRootIOSvc();
   void CreateOutRootFile();
+  void CreateOutputFromDmpIOSvc();
 
 private:
 typedef std::map<std::string, TTree*>  DmpRootIOTreeMap;                // key is "Tree"
